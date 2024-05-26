@@ -1,0 +1,38 @@
+﻿version: '3.8'
+
+networks:
+  my_network:
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: test_app
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DB_CONNECTION=Host=postgres;Port=5432;Database=question_db;User Id=postgres;Password=secret_password;
+    depends_on:
+      - postgres
+    networks:
+      - my_network
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      - POSTGRES_PASSWORD=secret_password
+      - POSTGRES_DB=question_db
+      - POSTGRES_USER=postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - my_network
+
+volumes:
+  postgres_data:
