@@ -25,6 +25,11 @@ public class InterviewEntity : BaseEntity
     public SurveyEntity Survey { get; set; }
 
     /// <summary>
+    ///     Навишационное свойство для результатов анкеты
+    /// </summary>
+    public List<ResultEntity> Results { get; set; } = new();
+
+    /// <summary>
     ///     Применить модель
     /// </summary>
     public static void SetUp(ModelBuilder modelBuilder)

@@ -38,13 +38,12 @@ public class SurveyDbContext : DbContext
         base.OnModelCreating(modelBuilder);
     }
 
+#if DEBUG
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-#if DEBUG
-        optionsBuilder.UseNpgsql("");
-        base.OnConfiguring(optionsBuilder);  
-#endif
+        base.OnConfiguring(optionsBuilder);
     }
+#endif
 
     #endregion
 }

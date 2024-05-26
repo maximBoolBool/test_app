@@ -13,8 +13,6 @@ namespace QuestionnaireServices.Services.Impl;
 public class QuestionnaireService : IQuestionnaireService
 {
     #region Fieldes
-
-    private const long StartPlaceInSurvey = 1;
     
     private readonly IMapper _mapper;
     private readonly ISurveyDbWorker _dbWorker;
@@ -60,15 +58,7 @@ public class QuestionnaireService : IQuestionnaireService
             throw new ErrorException(HttpStatusCode.NotFound, $"Does not exist question with id {request.QuestionId}");
         }
 
-        var interview = await CheckInterview(request.InterviewId, question.Id, cancellationToken);
-
-        var newResults = request.AnswerIds.Select(id => new ResultEntity
-        {
-            AnswerId = id,
-            InterviewId = interview.Id,
-        });
-
-        await _dbWorker.Results.AddRange(newResults);
+        await ApplyChanges(request, cancellationToken);
 
         var questions = await _dbWorker.Questions
             .ListAsync(e => e.SurveyId == request.SurveyId, cancellationToken);
@@ -88,28 +78,47 @@ public class QuestionnaireService : IQuestionnaireService
 
     #region Private Methodes
 
-    private async Task<InterviewEntity> CheckInterview(
-        long interviewId,
-        long questionId,
+    private async Task ApplyChanges(
+        UpplyResultRequest request,
         CancellationToken cancellationToken)
     {
-        var interview = await _dbWorker.Inteviews.GetByIdAsync(interviewId, cancellationToken);
-        if (interview == null && questionId == StartPlaceInSurvey)
+        List<ResultEntity> newResults;
+        InterviewEntity? interview;
+        
+        if (request.InterviewId == null)
         {
-            interview = new InterviewEntity()
+            interview = new()
             {
-                SurveyId = interviewId,
-                From = DateTime.UtcNow
+                From = DateTime.UtcNow,
+                SurveyId = request.SurveyId,
             };
+            
+            newResults = request.AnswerIds.Select(id => new ResultEntity
+            {
+                AnswerId = id,
+            }).ToList();
+
+            interview.Results = newResults;
             _dbWorker.Inteviews.Add(interview);
+            await _dbWorker.SaveChangesAsync(cancellationToken);
+            return;
         }
+
+        interview = await _dbWorker.Inteviews
+            .GetByIdAsync(request.InterviewId.Value, cancellationToken);
 
         if (interview == null)
         {
-            throw new ErrorException(HttpStatusCode.NotFound, $"Does not exist interview with id {interviewId}");
+            throw new ErrorException(HttpStatusCode.NotFound, $"Does not exist interview with id {request.InterviewId}");
         }
-
-        return interview;
+        
+        newResults = request.AnswerIds.Select(id => new ResultEntity
+        {
+            AnswerId = id,
+            InterviewId = interview.Id
+        }).ToList();
+        await _dbWorker.Results.AddRange(newResults);
+        await _dbWorker.SaveChangesAsync(cancellationToken);
     }
 
     #endregion

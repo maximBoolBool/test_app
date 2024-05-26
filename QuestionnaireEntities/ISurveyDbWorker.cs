@@ -32,5 +32,5 @@ public interface ISurveyDbWorker
     /// </summary>
     ISurveyRepository Surveys { get; }
 
-    Task SaveChangesAsync(CancellationToken cancellationToken);
+    Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }

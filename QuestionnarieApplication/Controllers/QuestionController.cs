@@ -25,7 +25,7 @@ public class QuestionController : Controller
     #region GET api/questions{id}
 
     [HttpGet("{id:long}")]
-    public async Task<IActionResult> GetQuestion([FromQuery] long id, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetQuestion([FromRoute] long id, CancellationToken cancellationToken)
     {
         var response = await _service.GetQuestionByIdAsync(id, cancellationToken);
         return Ok(response);

@@ -12,8 +12,7 @@ public class ErrorHandlerMiddleware
     {
         _next = next;
     }
-    
-    
+
     public async Task InvokeAsync(HttpContext context)
     {
         try
@@ -36,6 +35,7 @@ public class ErrorHandlerMiddleware
                 };
                 
                 await context.Response.WriteAsync(JsonConvert.SerializeObject(error));
+                return;
             }
 
             context.Response.ContentType = "application/json";
