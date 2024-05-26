@@ -40,8 +40,10 @@ public class SurveyDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
+#if DEBUG
         optionsBuilder.UseNpgsql("");
-        base.OnConfiguring(optionsBuilder);
+        base.OnConfiguring(optionsBuilder);  
+#endif
     }
 
     #endregion
