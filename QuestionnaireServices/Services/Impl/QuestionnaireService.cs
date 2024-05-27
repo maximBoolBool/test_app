@@ -58,7 +58,7 @@ public class QuestionnaireService : IQuestionnaireService
             throw new ErrorException(HttpStatusCode.NotFound, $"Does not exist question with id {request.QuestionId}");
         }
 
-        await ApplyChanges(request, cancellationToken);
+        var interview = await ApplyInterviewChanges(request, cancellationToken);
 
         var questions = await _dbWorker.Questions
             .ListAsync(e => e.SurveyId == request.SurveyId, cancellationToken);
@@ -70,7 +70,8 @@ public class QuestionnaireService : IQuestionnaireService
             QuestionCount = questions.Count,
             QuestionId = nextQuestion?.Id,
             QuestionNumber = nextQuestion?.PlaceInSurvey ?? questions.Count,
-            IsEnd = nextQuestion == null
+            IsEnd = nextQuestion == null,
+            InterviewId = interview.Id
         };
     }
 
@@ -78,7 +79,7 @@ public class QuestionnaireService : IQuestionnaireService
 
     #region Private Methodes
 
-    private async Task ApplyChanges(
+    private async Task<InterviewEntity> ApplyInterviewChanges(
         UpplyResultRequest request,
         CancellationToken cancellationToken)
     {
@@ -101,7 +102,7 @@ public class QuestionnaireService : IQuestionnaireService
             interview.Results = newResults;
             _dbWorker.Inteviews.Add(interview);
             await _dbWorker.SaveChangesAsync(cancellationToken);
-            return;
+            return interview;
         }
 
         interview = await _dbWorker.Inteviews
@@ -119,6 +120,7 @@ public class QuestionnaireService : IQuestionnaireService
         }).ToList();
         await _dbWorker.Results.AddRange(newResults);
         await _dbWorker.SaveChangesAsync(cancellationToken);
+        return interview;
     }
 
     #endregion

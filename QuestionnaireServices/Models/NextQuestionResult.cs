@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace QuestionnaireServices.Models;
 
@@ -30,4 +31,10 @@ public class NextQuestionResult
     /// </summary>
     [JsonProperty("is_next_exist")]
     public bool IsEnd { get; set; }
+    
+    /// <summary>
+    ///     Id интервью
+    /// </summary>
+    [JsonProperty("interview_id")]
+    public long InterviewId { get; set; }
 }
